@@ -204,7 +204,7 @@ export class ProgramsService extends DataService implements CanActivate {
                 firstName: this.userService.userProfile.firstName,
                 lastName: this.userService.userProfile.lastName || '',
                 userId: this.userService.userProfile.identifier,
-                enrolledDate: this.datePipe.transform(new Date(), 'yyyy-MM-dd'),
+                enrolledDate: new Date().toISOString(),
                 board : contibutorOrg.board,
                 medium: contibutorOrg.medium,
                 gradeLevel: contibutorOrg.gradeLevel,
@@ -343,7 +343,7 @@ export class ProgramsService extends DataService implements CanActivate {
                     firstName: user.firstName,
                     lastName: user.lastName || '',
                     userId: user.identifier,
-                    enrolledDate: this.datePipe.transform(new Date(), 'yyyy-MM-dd'),
+                    enrolledDate: new Date().toISOString(),
                     channel: user.rootOrgId
                   }
                 };
@@ -428,7 +428,7 @@ export class ProgramsService extends DataService implements CanActivate {
             firstName: this.userService.userProfile.firstName,
             lastName: this.userService.userProfile.lastName || '',
             userId: this.userService.userProfile.identifier,
-            enrolledDate: this.datePipe.transform(new Date(), 'yyyy-MM-dd'),
+            enrolledDate: new Date().toISOString(),
             channel: this.userService.userProfile.rootOrgId
           }
         };
@@ -905,7 +905,23 @@ export class ProgramsService extends DataService implements CanActivate {
       }));
   }
 
-  downloadReport(config) {
+  downloadReport(programId, programName) {
+    const req = {
+      url: `${this.config.urlConFig.URLS.CONTRIBUTION_PROGRAMS.NOMINATION_LIST_DOWNLOAD}`,
+      data: {
+        request: {
+          filters: {
+            program_name: programName,
+            program_id: programId,
+            status: ['Pending', 'Approved', 'Rejected']
+          }
+        }
+      }
+    };
+    return this.API_URL(req);
+  }
+
+  generateCSV(config) {
     const tableData = config.tableData;
     delete config.tableData;
     let options = {
