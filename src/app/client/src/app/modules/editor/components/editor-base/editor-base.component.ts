@@ -24,6 +24,7 @@ export class EditorBaseComponent implements OnInit {
   public prevSelectedNodeData: any = {};
   toolbarConfig = toolbarConfig;
   public showQuestionTemplate: Boolean = false;
+  public showResourceModal: Boolean = false;
   private editorParams: IeditorParams;
 
   constructor(public treeService: TreeService, private editorService: EditorService, private activatedRoute: ActivatedRoute,
@@ -49,6 +50,9 @@ export class EditorBaseComponent implements OnInit {
         this.editorService.emitSelectedNodeMetaData({type: 'saveContent'});
         this.saveContent();
         break;
+      case 'addResource':
+        this.showResourceModal = true;
+      break;
       case 'deleteContent':
           this.removeNode();
         break;
@@ -81,8 +85,12 @@ export class EditorBaseComponent implements OnInit {
     }
   }
 
+  onProceedClick(event) {
+    this.editorService.emitResourceAddition(_.get(event, "data"));
+    this.showResourceModal = false;
+  }
+
   treeEventListener(event: any) {
-    console.log(event);
     switch (event.type) {
       case 'nodeSelect':
         if (!this.prevSelectedNodeData.data) {
