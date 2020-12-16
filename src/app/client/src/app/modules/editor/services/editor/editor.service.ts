@@ -17,11 +17,20 @@ export class EditorService {
   private _formData$ = new BehaviorSubject<IeventData>(undefined);
   public readonly formData$: Observable<IeventData> = this._formData$
     .asObservable().pipe(skipWhile(data => data === undefined || data === null));
+
+  public _resourceAddition$ = new Subject<any>();
+  public readonly resourceAddition$: Observable<any> = this._resourceAddition$
+    .asObservable().pipe(skipWhile(data => data === undefined || data === null));
+
   constructor(public treeService: TreeService, public actionService: ActionService, public configService: ConfigService,
     public userService: UserService) { }
 
   emitSelectedNodeMetaData(data: IeventData) {
     this._formData$.next(data);
+  }
+
+  emitResourceAddition(data){
+    this._resourceAddition$.next(data);
   }
 
   fetchCollectionHierarchy(data): Observable<any> {

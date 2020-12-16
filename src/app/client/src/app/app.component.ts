@@ -195,7 +195,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
       this.chatbotInputObj = {
       chatbotUrl: `${baseUrl}/chatapi/bot`,
-      title: this.resourceService.frmelmnts.lbl.chatbot.title,
+      title: _.get(this.resourceService, 'frmelmnts.lbl.chatbot.title'),
       //imageUrl : image.imageUrl,
       appId: this.appId,
       channel: this.channel,
