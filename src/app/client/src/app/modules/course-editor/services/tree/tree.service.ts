@@ -56,8 +56,8 @@ export class TreeService {
         newNode.data.metadata = { mimeType: 'application/vnd.ekstep.content-collection', contentType: _.get(this.getActiveNode(), 'data.objectType'), code: node.id, name: node.title };
       }
       // tslint:disable-next-line:max-line-length
-      this.treeCache.nodesModified[node.id] = { isNew: true, root: false, metadata: { mimeType: 'application/vnd.ekstep.content-collection', contentType: _.get(this.getActiveNode(), 'data.objectType'), code: node.id, name: node.title } };
-      this.treeCache.nodes.push(node.id);
+      const modificationData = { isNew: true, root: false, metadata: { mimeType: 'application/vnd.ekstep.content-collection', contentType: _.get(this.getActiveNode(), 'data.objectType'), code: node.id, name: node.title } };
+      this.setTreeCache(node.id, modificationData);
     } else {
       newNode = (createType === 'sibling') ? selectedNode.appendSibling(node) : selectedNode.addChildren(node);
     }
@@ -109,6 +109,7 @@ export class TreeService {
         this.checkModification(node, newData);
         node.data.metadata = {...node.data.metadata, ...newData.metadata};
         node.title = newData.metadata.name;
+        return;
       }
     });
   }
@@ -120,10 +121,16 @@ export class TreeService {
       for (const key in oldMetadata) {
         if (typeof(oldMetadata[key]) === 'string' && newMetadata[key] && oldMetadata[key] !== newMetadata[key]) {
           // tslint:disable-next-line:max-line-length
-          this.treeCache.nodesModified[node.data.id] = { isNew: false, root: false, metadata: {...oldMetadata, ..._.pick(newMetadata, key)} };
+          const modificationData = {root: false, metadata: {...oldMetadata, ..._.pick(newMetadata, key)}, ...(node.data.id.includes('do_') ? {isNew: false} : {isNew: true})};
+          this.setTreeCache(node.data.id, modificationData);
         }
       }
     }
+  }
+
+  setTreeCache(nodeId, data) {
+    this.treeCache.nodesModified[nodeId] = data;
+    this.treeCache.nodes.push(nodeId); // To track sequence of modifiation
   }
 
   clearTreeCache(node?) {

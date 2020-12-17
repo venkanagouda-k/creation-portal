@@ -62,12 +62,16 @@ export class EditorBaseComponent implements OnInit {
   }
 
   saveContent() {
-    // const tree = this.treeService.getTreeObject();
-    // console.log(tree);
-    // console.log(this.treeService.getActiveNode());
     this.editorService.updateHierarchy()
       .pipe(map(data => _.get(data, 'result'))).subscribe(response => {
-        this.treeService.replaceNodeId(response.identifiers);
+        if (!_.isEmpty(response.identifiers)) {
+          this.treeService.replaceNodeId(response.identifiers);
+          if (response.identifiers[this.selectedNodeData.data.id]) {
+            // tslint:disable-next-line:max-line-length
+            this.selectedNodeData.data.metadata = _.get(this.treeService.treeCache.nodesModified, `${this.selectedNodeData.data.id}.metadata`);
+            this.selectedNodeData.data.id = response.identifiers[this.selectedNodeData.data.id];
+          }
+        }
         this.treeService.clearTreeCache();
         this.toasterService.success('Hierarchy is Sucessfuly Updated');
       });
@@ -85,11 +89,6 @@ export class EditorBaseComponent implements OnInit {
     }
   }
 
-  onProceedClick(event) {
-    this.editorService.emitResourceAddition(_.get(event, "data"));
-    this.showResourceModal = false;
-  }
-
   treeEventListener(event: any) {
     switch (event.type) {
       case 'nodeSelect':
@@ -105,4 +104,10 @@ export class EditorBaseComponent implements OnInit {
         break;
     }
   }
+
+  onProceedClick(event) {
+    this.editorService.emitResourceAddition(_.get(event, 'data'));
+    this.showResourceModal = false;
+  }
+
 }

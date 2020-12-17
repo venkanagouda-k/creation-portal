@@ -35,4 +35,4 @@ import { MetaFormComponent } from './components/meta-form/meta-form.component';
     CommonConsumptionModule
   ]
 })
-export class EditorModule { }
+export class CourseEditorModule { }
