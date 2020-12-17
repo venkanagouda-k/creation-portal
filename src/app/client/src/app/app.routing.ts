@@ -39,6 +39,9 @@ const appRoutes: Routes = [
     path: 'edit', loadChildren: 'app/modules/course-editor/editor.module#CourseEditorModule'
   },
   {
+    path: 'create', loadChildren: 'app/modules/editor/editor.module#EditorModule'
+  },
+  {
     path: '', loadChildren: 'app/modules/public/public.module#PublicModule'
   },
   {

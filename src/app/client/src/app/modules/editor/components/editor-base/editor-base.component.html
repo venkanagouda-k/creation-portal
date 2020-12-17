@@ -1,0 +1,37 @@
+<div class="add-to-library mb-30" *ngIf='!showLoader'>
+  <app-editor-header
+    [toolbarConfig]="toolbarConfig"
+    (toolbarEmitter)="toolbarEventListener($event)"
+  >
+  </app-editor-header>
+  <div class="min-h-500 sb-bg-white">
+    <div class="ui">
+      <div class="ui twelve column grid m-0">
+        <!-- Left Sidebar for cards -->
+        <div class="three wide column p-0 h-100vh">
+          <app-fancy-tree *ngIf="collectionTreeNodes" (treeEventEmitter)="treeEventListener($event)" [nodes]="collectionTreeNodes"
+            [options]="{ showConnectors: true }" class="sb-collectionTree-fancyTree sb-collectionTree-fancyTreelist">
+          </app-fancy-tree>
+        </div>
+        <!-- Right Player Sections -->
+        <div class="eight wide column bg-white pl-40">
+          <ng-container *ngIf="selectedQuestionData?.folder === true">
+            <app-question-set [questionSetMetadata]="selectedQuestionData" (toolbarEmitter)="toolbarEventListener($event)"></app-question-set>
+          </ng-container>
+          <ng-container *ngIf="selectedQuestionData?.folder === false">
+            <app-contentplayer-page [questionMetaData]="selectedQuestionData" (toolbarEmitter)="toolbarEventListener($event)"></app-contentplayer-page>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf='showLoader' class="ui container sb-chapter-list">
+  <app-loader></app-loader>
+</div>
+
+
+<app-question-template *ngIf='showQuestionTemplatePopup'
+[templateList]="templateList"
+(templateSelection)="handleTemplateSelection($event)">
+</app-question-template>
