@@ -116,13 +116,21 @@ export class TreeService {
 
   checkModification(node, newData) {
     const oldMetadata = _.get(node, 'data.metadata');
-    const newMetadata = _.get(newData, 'metadata');
+    const newMetadata = _.pickBy(_.get(newData, 'metadata'), _.identity);
     if (oldMetadata) {
-      for (const key in oldMetadata) {
-        if (typeof(oldMetadata[key]) === 'string' && newMetadata[key] && oldMetadata[key] !== newMetadata[key]) {
+      for (const key in newMetadata) {
+        if (typeof(oldMetadata[key]) === typeof(newMetadata[key])) {
           // tslint:disable-next-line:max-line-length
-          const modificationData = {root: false, metadata: {...oldMetadata, ..._.pick(newMetadata, key)}, ...(node.data.id.includes('do_') ? {isNew: false} : {isNew: true})};
-          this.setTreeCache(node.data.id, modificationData);
+          if ((typeof(newMetadata[key]) === 'string' || typeof(newMetadata[key]) === 'number')  && oldMetadata[key] !== newMetadata[key]) {
+            // tslint:disable-next-line:max-line-length
+            const modificationData = {root: false, metadata: {..._.pick(newMetadata, key)}, ...(node.data.id.includes('do_') ? {isNew: false} : {isNew: true})};
+            this.setTreeCache(node.data.id, modificationData);
+          // tslint:disable-next-line:max-line-length
+          } else if (typeof(newMetadata[key]) === 'object' && (newMetadata[key].length !== oldMetadata[key].length || _.difference(oldMetadata[key], newMetadata[key]).length)) {
+            // tslint:disable-next-line:max-line-length
+            const modificationData = {root: false, metadata: {..._.pick(newMetadata, key)}, ...(node.data.id.includes('do_') ? {isNew: false} : {isNew: true})};
+            this.setTreeCache(node.data.id, modificationData);
+          }
         }
       }
     }

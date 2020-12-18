@@ -4,6 +4,7 @@ import { takeUntil } from 'rxjs/operators';
 import { EditorService, TreeService } from '../../services';
 import { IeventData } from '../../interfaces';
 import * as _ from 'lodash-es';
+import {formConfig} from './form-config';
 
 @Component({
   selector: 'app-meta-form',
@@ -14,6 +15,7 @@ export class MetaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   private onComponentDestroy$ = new Subject<any>();
   public metaDataFields: {};
+  public formDataConfig = _.cloneDeep(formConfig);
   @Output() public prevNodeMeatadata: EventEmitter<IeventData> = new EventEmitter();
   constructor(private editorService: EditorService, public treeService: TreeService) { }
 
@@ -28,7 +30,13 @@ export class MetaFormComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  dataChanged(e) {
+  // dataChanged(e) {
+  //   this.treeService.setNodeTitle(_.get(this.metaDataFields, 'name'));
+  // }
+
+  outputData(eventData) {
+    console.log('------>', eventData);
+    this.metaDataFields = eventData;
     this.treeService.setNodeTitle(_.get(this.metaDataFields, 'name'));
   }
 

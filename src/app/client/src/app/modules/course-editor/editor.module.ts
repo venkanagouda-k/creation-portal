@@ -5,24 +5,21 @@ import { CoreModule } from '@sunbird/core';
 import { SuiModule } from 'ng2-semantic-ui';
 
 import { EditorRoutingModule } from './editor-routing.module';
-import { CollectionTreeComponent,  FancyTreeComponent, QuestionTemplateComponent, QuestionBaseComponent,
+import { CollectionTreeComponent,  FancyTreeComponent,
 ContentplayerPageComponent } from './components';
 import { EditorHeaderComponent } from './components/editor-header/editor-header.component';
-import { ReferenceQuestionComponent } from './components/reference-question/reference-question.component';
-import { MultiplechoiceQuestionComponent } from './components/multiplechoice-question/multiplechoice-question.component';
-import { QuestionSetComponent } from './components/question-set/question-set.component';
 import { EditorBaseComponent } from './components/editor-base/editor-base.component';
 import {CbseProgramModule} from '../cbse-program';
 import { ResourcesComponent } from './components/resources/resources.component';
 import { CommonConsumptionModule } from '@project-sunbird/common-consumption';
 import { MetaFormComponent } from './components/meta-form/meta-form.component';
+import { CommonFormElementsModule } from 'v-dynamic-forms';
 
 // import { PlayerHelperModule } from '@sunbird/player-helper';
 
 @NgModule({
-  declarations: [CollectionTreeComponent, EditorHeaderComponent, ReferenceQuestionComponent,
-    MultiplechoiceQuestionComponent, QuestionSetComponent, EditorBaseComponent, FancyTreeComponent, QuestionTemplateComponent,
-    QuestionBaseComponent, ContentplayerPageComponent, ResourcesComponent, MetaFormComponent],
+  declarations: [CollectionTreeComponent, EditorHeaderComponent, EditorBaseComponent, FancyTreeComponent,
+    ContentplayerPageComponent, ResourcesComponent, MetaFormComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -32,7 +29,8 @@ import { MetaFormComponent } from './components/meta-form/meta-form.component';
     EditorRoutingModule,
     // PlayerHelperModule
     CbseProgramModule,
-    CommonConsumptionModule
+    CommonConsumptionModule,
+    CommonFormElementsModule
   ]
 })
 export class CourseEditorModule { }
