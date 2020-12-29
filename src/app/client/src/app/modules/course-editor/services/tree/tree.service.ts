@@ -56,8 +56,10 @@ export class TreeService {
         newNode.data.metadata = { mimeType: 'application/vnd.ekstep.content-collection', contentType: _.get(this.getActiveNode(), 'data.objectType'), code: node.id, name: node.title };
       }
       // tslint:disable-next-line:max-line-length
-      const modificationData = { isNew: true, root: false, metadata: { mimeType: 'application/vnd.ekstep.content-collection', contentType: _.get(this.getActiveNode(), 'data.objectType'), code: node.id, name: node.title } };
-      this.setTreeCache(node.id, modificationData);
+      // const modificationData = { isNew: true, root: false, metadata: { mimeType: 'application/vnd.ekstep.content-collection', contentType: _.get(this.getActiveNode(), 'data.objectType'), code: node.id, name: node.title } };
+      // tslint:disable-next-line:max-line-length
+      const metadata = { mimeType: 'application/vnd.ekstep.content-collection', contentType: _.get(this.getActiveNode(), 'data.objectType'), code: node.id, name: node.title };
+      this.setTreeCache(node.id, metadata);
     } else {
       newNode = (createType === 'sibling') ? selectedNode.appendSibling(node) : selectedNode.addChildren(node);
     }
@@ -71,8 +73,8 @@ export class TreeService {
 
   removeNode() {
     const selectedNode = this.getActiveNode();
+    this.setActiveNode(selectedNode.getPrevSibling());
     selectedNode.remove();
-    this.getFirstChild().setExpanded();
     $('span.fancytree-title').attr('style', 'width:11em;text-overflow:ellipsis;white-space:nowrap;overflow:hidden');
     $(this.treeNativeElement).scrollLeft($('.fancytree-lastsib').width());
     $(this.treeNativeElement).scrollTop($('.fancytree-lastsib').height());
@@ -80,6 +82,10 @@ export class TreeService {
 
   getActiveNode () {
     return $(this.treeNativeElement).fancytree('getTree').getActiveNode();
+  }
+
+  setActiveNode(node) {
+    node.setActive();
   }
 
   getFirstChild () {
@@ -123,13 +129,13 @@ export class TreeService {
           // tslint:disable-next-line:max-line-length
           if ((typeof(newMetadata[key]) === 'string' || typeof(newMetadata[key]) === 'number')  && oldMetadata[key] !== newMetadata[key]) {
             // tslint:disable-next-line:max-line-length
-            const modificationData = {root: false, metadata: {..._.pick(newMetadata, key)}, ...(node.data.id.includes('do_') ? {isNew: false} : {isNew: true})};
-            this.setTreeCache(node.data.id, modificationData);
+            // const modificationData = {root: false, metadata: {..._.pick(newMetadata, key)}, ...(node.data.id.includes('do_') ? {isNew: false} : {isNew: true})};
+            this.setTreeCache(node.data.id, _.pick(newMetadata, key));
           // tslint:disable-next-line:max-line-length
           } else if (typeof(newMetadata[key]) === 'object' && (newMetadata[key].length !== oldMetadata[key].length || _.difference(oldMetadata[key], newMetadata[key]).length)) {
             // tslint:disable-next-line:max-line-length
-            const modificationData = {root: false, metadata: {..._.pick(newMetadata, key)}, ...(node.data.id.includes('do_') ? {isNew: false} : {isNew: true})};
-            this.setTreeCache(node.data.id, modificationData);
+            // const modificationData = {root: false, metadata: {..._.pick(newMetadata, key)}, ...(node.data.id.includes('do_') ? {isNew: false} : {isNew: true})};
+            this.setTreeCache(node.data.id, _.pick(newMetadata, key));
           }
         }
       }
@@ -137,8 +143,13 @@ export class TreeService {
   }
 
   setTreeCache(nodeId, data) {
-    this.treeCache.nodesModified[nodeId] = data;
-    this.treeCache.nodes.push(nodeId); // To track sequence of modifiation
+    if (this.treeCache.nodesModified[nodeId]) {
+      this.treeCache.nodesModified[nodeId]['metadata'] = {...this.treeCache.nodesModified[nodeId]['metadata'], ...data};
+    } else {
+      // tslint:disable-next-line:max-line-length
+      this.treeCache.nodesModified[nodeId] = {root: false, metadata: {...data}, ...(nodeId.includes('do_') ? {isNew: false} : {isNew: true})};
+      this.treeCache.nodes.push(nodeId); // To track sequence of modifiation
+    }
   }
 
   clearTreeCache(node?) {

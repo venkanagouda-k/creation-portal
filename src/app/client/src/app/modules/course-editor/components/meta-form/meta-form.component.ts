@@ -15,7 +15,7 @@ export class MetaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   private onComponentDestroy$ = new Subject<any>();
   public metaDataFields: {};
-  public formDataConfig = _.cloneDeep(formConfig);
+  public formDataConfig;
   @Output() public prevNodeMeatadata: EventEmitter<IeventData> = new EventEmitter();
   constructor(private editorService: EditorService, public treeService: TreeService) { }
 
@@ -27,12 +27,22 @@ export class MetaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.editorService.formData$.pipe(takeUntil(this.onComponentDestroy$)).subscribe((data: IeventData) => {
       this.prevNodeMeatadata.emit({type: data.type, metadata: this.metaDataFields});
       this.metaDataFields = data.metadata ? data.metadata : this.metaDataFields;
+      this.attachDefaultValues();
     });
   }
 
   // dataChanged(e) {
   //   this.treeService.setNodeTitle(_.get(this.metaDataFields, 'name'));
   // }
+
+  attachDefaultValues() {
+    this.formDataConfig = _.map(formConfig, val => {
+      if (_.get(this.metaDataFields, val.code)) {
+        val['default'] = _.get(this.metaDataFields, val.code);
+      }
+      return val;
+    });
+  }
 
   outputData(eventData) {
     console.log('------>', eventData);

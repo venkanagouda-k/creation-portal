@@ -1,6 +1,6 @@
 export const toolbarConfig = {
-  headerName: 'Create Question Set',
-  title: 'Question Collection',
+  headerName: 'Edit Course',
+  title: 'Course Editor',
   buttons: [{
     name: 'Save as draft',
     type: 'saveContent',

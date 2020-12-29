@@ -218,6 +218,8 @@
 <button type="button" class="sb-btn sb-btn-normal sb-btn-outline-primary mx-15">
   <i class="icon plus"></i> Add from library
 </button> -->
+<ng-container *ngIf="formDataConfig">
+  <sb-form [config]="formDataConfig" (initialize)="outputData($event)"></sb-form>
+</ng-container>
 
-<sb-form [config]="formDataConfig" (initialize)="outputData($event)"></sb-form>
 <!-- </ng-container> -->
