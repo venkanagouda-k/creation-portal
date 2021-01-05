@@ -85,7 +85,7 @@ export class TreeService {
   }
 
   setActiveNode(node) {
-    node.setActive();
+    node.setActive(true);
   }
 
   getFirstChild () {
@@ -171,4 +171,13 @@ export class TreeService {
     $('span.fancytree-title').attr('style', 'width:11em;text-overflow:ellipsis;white-space:nowrap;overflow:hidden');
   }
 
+  closePrevOpenedDropDown() {
+    $(this.treeNativeElement).fancytree('getTree').visit((node) => {
+      const nSpan = $(node.span);
+
+        const dropDownElement = $(nSpan[0]).find(`#contextMenuDropDown_${node.data.id}`);
+        dropDownElement.addClass('hidden');
+        dropDownElement.removeClass('visible');
+    });
+  }
 }

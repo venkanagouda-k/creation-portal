@@ -53,9 +53,6 @@ export class EditorBaseComponent implements OnInit {
       case 'addResource':
         this.showResourceModal = true;
       break;
-      case 'deleteContent':
-          this.removeNode();
-        break;
       default:
         break;
     }
@@ -75,10 +72,6 @@ export class EditorBaseComponent implements OnInit {
         this.treeService.clearTreeCache();
         this.toasterService.success('Hierarchy is Sucessfuly Updated');
       });
-  }
-
-  removeNode() {
-    this.treeService.removeNode();
   }
 
   updateNodeMetadata(eventData: IeventData) {

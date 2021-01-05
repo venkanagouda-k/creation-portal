@@ -9,7 +9,8 @@ import { editorConfig } from '../../editor.config';
 import { Observable, Subject } from 'rxjs';
 @Component({
   selector: 'app-fancy-tree',
-  templateUrl: './fancy-tree.component.html'
+  templateUrl: './fancy-tree.component.html',
+  styleUrls: ['./fancy-tree.component.scss']
 })
 export class FancyTreeComponent implements AfterViewInit, OnDestroy {
   @ViewChild('fancyTree') public tree: ElementRef;
@@ -20,9 +21,11 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
   public showTree: boolean;
   constructor(public activatedRoute: ActivatedRoute, public treeService: TreeService,private editorService: EditorService) { }
   private onComponentDestroy$ = new Subject<any>();
+  public showDeleteConfirmationPopUp: boolean;
 
   ngAfterViewInit() {
     this.renderTree(this.getTreeConfig());
+    // this.attachEventListener();
     this.resourceAddition();
     // const rootNode = $(this.tree.nativeElement).fancytree('getRootNode');
     // const firstChild = rootNode.getFirstChild().getFirstChild(); // rootNode.getFirstChild() will always be available.
@@ -51,7 +54,7 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
 
   getTreeConfig() {
     const options: any = {
-      extensions: ['glyph'],
+      extensions: ['glyph', 'dnd5'],
       clickFolderMode: 3,
       source: this.nodes,
       glyph: {
@@ -59,6 +62,56 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
         map: {
           folder: 'icon folder sb-fancyTree-icon',
           folderOpen: 'icon folder outline sb-fancyTree-icon'
+        }
+      },
+      dnd5: {
+        autoExpandMS: 400,
+        focusOnClick: true,
+        preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
+        preventRecursion: true, // Prevent dropping nodes on own descendants
+        dragStart: (node, data) => {
+          /** This function MUST be defined to enable dragging for the tree.
+           *  Return false to cancel dragging of node.
+           */
+          const draggable = _.get(this.config, 'editorConfig.mode') === 'Edit' ? true : false;
+          return draggable;
+        },
+        dragEnter: (node, data) => {
+          /** data.otherNode may be null for non-fancytree droppables.
+           *  Return false to disallow dropping on node. In this case
+           *  dragOver and dragLeave are not called.
+           *  Return 'over', 'before, or 'after' to force a hitMode.
+           *  Return ['before', 'after'] to restrict available hitModes.
+           *  Any other return value will calc the hitMode from the cursor position.
+           */
+          // Prevent dropping a parent below another parent (only sort
+          // nodes under the same parent)
+/*           if(node.parent !== data.otherNode.parent){
+            return false;
+          }
+          // Don't allow dropping *over* a node (would create a child)
+          return ["before", "after"];
+*/
+           return true;
+        },
+        dragDrop: (node, data) => {
+          /** This function MUST be defined to enable dropping of items on
+           *  the tree.
+           */
+          // data.otherNode.moveTo(node, data.hitMode);
+          return this.dragDrop(node, data);
+        },
+        filter: {
+          autoApply: true,
+          autoExpand: false,
+          counter: true,
+          fuzzy: false,
+          hideExpandedCounter: true,
+          hideExpanders: false,
+          highlight: true,
+          leavesOnly: false,
+          nodata: true,
+          mode: 'dimm'
         }
       },
       init: (event, data) => {
@@ -69,25 +122,69 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
       click: (event, data): boolean => {
         this.tree.nativeElement.click();
         const node = data.node;
-        this.treeEventEmitter.emit({ 'type': 'nodeSelect', 'data': node });
+        // this.treeEventEmitter.emit({ 'type': 'nodeSelect', 'data': node });
         return true;
       },
       activate: (event, data) => {
+        console.log($(this.tree.nativeElement).fancytree('getTree').getSelectedNodes(), '=============+++++');
+        console.log(this.getActiveNode().data.id, '==========++++');
+        this.treeEventEmitter.emit({ 'type': 'nodeSelect', 'data': data.node });
         setTimeout(() => {
-          this.treeEventEmitter.emit({ 'type': 'nodeSelect', 'data': data.node });
-        }, 0);
+          this.attachContextMenu(data.node, true);
+        }, 10);
       },
       renderNode: (event, data) => {
-        if (data.node.data.root) {
-          // data.node.span.style.display = 'none';
+        // if (data.node.data.root) {
+        //   // data.node.span.style.display = 'none';
+        // }
+        const node = data.node;
+        const $nodeSpan = $(node.span);
+
+        // check if span of node already rendered
+        if (!$nodeSpan.data('rendered')) {
+            // tslint:disable-next-line:max-line-length
+            // const deleteTemplate = `<span> <i class="fa fa-trash-o" type="button"  onclick=""></i> </span>`;
+
+            // const deleteButton = $(deleteTemplate);
+
+            // $nodeSpan.append(deleteButton);
+
+            // deleteButton.hide();
+
+            // $nodeSpan[0].onmouseover = () => {
+            //   deleteButton.show();
+            // };
+
+            // $nodeSpan[0].onmouseout = () => {
+            //   deleteButton.hide();
+            // };
+            this.attachContextMenu(node);
+            // this.attachEventListener();
+
+            // span rendered
+            $nodeSpan.data('rendered', true);
         }
       }
     };
     return options;
   }
 
+  attachEventListener() {
+    $('#contextMenu').on('click', (event) => {
+      console.log('eventtt----->', event);
+    });
+  }
+
   expandAll(flag) {
     $(this.tree.nativeElement).fancytree('getTree').visit((node) => { node.setExpanded(flag); });
+  }
+
+  something() {
+    return this.somee();
+  }
+
+  somee() {
+    alert('nfjsdh');
   }
 
   collapseAllChildrens(flag) {
@@ -136,6 +233,140 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
     return _.find(this.config.editorConfig.rules.objectTypes, (obj) => {
       return obj.type === type;
     });
+  }
+
+  attachContextMenu(node, activeNode?) {
+    const $nodeSpan = $(node.span);
+    // const deleteTemplate = `<span> <i class="fa fa-trash-o" type="button"  onclick=""></i> </span>`;
+    // tslint:disable-next-line:max-line-length
+    const deleteTemplate = `<span class="ui dropdown sb-dotted-dropdown" autoclose="itemClick" suidropdown="" tabindex="0">
+                              <span id="contextMenu_${node.data.id}" class="p-0 w-auto"><i class="icon ellipsis vertical sb-color-black"></i></span>
+                              <span id= "contextMenuDropDown_${node.data.id}" class="menu transition hidden" suidropdownmenu="" style="">
+                                <div id="edit" class="item">Edit</div>
+                                <div id="addsibling" class="item">Add Sibling</div>
+                                <div id="addchild" class="item">Add Child</div>
+                                <div id="delete" class="item">Delete</div>
+                              </span>
+                            </span>
+                            <span id= "removeNodeIcon_${node.data.id}"> <i class="fa fa-trash-o" type="button"></i> </span>`;
+    const deleteButton = $(deleteTemplate);
+
+    $nodeSpan.append(deleteButton);
+
+    if (!activeNode) {
+      deleteButton.hide();
+    }
+
+    $nodeSpan[0].onmouseover = () => {
+      deleteButton.show();
+    };
+
+    $nodeSpan[0].onmouseout = () => {
+      deleteButton.hide();
+    };
+
+    $($nodeSpan[0]).find(`#contextMenu_${node.data.id}`).on('click', (event) => {
+      this.treeService.closePrevOpenedDropDown();
+      setTimeout(() => {
+        const nSpan = $(this.getActiveNode().span);
+
+        const dropDownElement = $(nSpan[0]).find(`#contextMenuDropDown_${this.getActiveNode().data.id}`);
+        dropDownElement.removeClass('hidden');
+        dropDownElement.addClass('visible');
+        _.forEach(_.get(_.first(dropDownElement), 'children'), item => {
+          item.addEventListener('click', (ev) => {
+            this.handleActionButtons(ev.currentTarget);
+            ev.stopPropagation();
+          });
+        });
+      }, 100);
+      // event.stopPropagation();
+    });
+
+    $($nodeSpan[0]).find(`#removeNodeIcon_${node.data.id}`).on('click', (ev) => {
+      this.showDeleteConfirmationPopUp = true;
+    });
+
+  }
+
+  dropNode(node, data) {
+    let objectType;
+    if (data.otherNode.getLevel() === node.getLevel()) {
+      objectType = node.getParent().data.objectType;
+    } else if ((this.maxTreeDepth(data.otherNode) + node.getLevel()) > _.get(this.config, 'editorConfig.rules.levels')) {
+      return this.dropNotAllowed();
+    } else if (data.hitMode === 'before' || data.hitMode === 'after') {
+      objectType = node.getParent().data.objectType;
+    } else {
+      objectType = node.data.objectType;
+    }
+
+    const dropAllowed = _.includes(this.getObjectType(objectType).childrenTypes, data.otherNode.data.objectType);
+    if (dropAllowed) {
+      data.otherNode.moveTo(node, data.hitMode);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+    dragDrop(node, data) {
+      if ((data.hitMode === 'before' || data.hitMode === 'after' || data.hitMode === 'over') && data.node.data.root) {
+        return this.dropNotAllowed();
+      }
+      if (_.get(this.config, 'editorConfig.rules.levels')) {
+        return this.dropNode(node, data);
+      }
+    }
+
+    dropNotAllowed() {
+      // ecEditor.dispatchEvent('org.ekstep.toaster:warning', {
+      //   title: 'This operation is not allowed!',
+      //   position: 'topCenter',
+      //   icon: 'fa fa-warning'
+      // })
+      return false;
+    }
+
+  maxTreeDepth(root) {
+    const buffer = [{ node: root, depth: 1 }];
+    let current = buffer.pop();
+    let max = 0;
+
+    while (current && current.node) {
+      // Find all children of this node.
+      _.forEach(current.node.children, (child) => {
+        buffer.push({ node: child, depth: current.depth + 1 });
+      });
+      if (current.depth > max) {
+        max = current.depth;
+      }
+      current = buffer.pop();
+    }
+    return max;
+  }
+
+
+
+  removeNode() {
+    this.treeService.removeNode();
+  }
+
+  handleActionButtons(el) {
+    console.log('action buttons -------->', el.id);
+    switch (el.id) {
+      case 'edit':
+        break;
+      case 'delete':
+        this.showDeleteConfirmationPopUp = true;
+        break;
+      case 'addsibling':
+        this.addSibling();
+        break;
+      case 'addchild':
+        this.addChild();
+        break;
+    }
   }
 
   ngOnDestroy() {

@@ -3,3 +3,22 @@
 
 <button (click)="addSibling();" class="sb-btn sb-btn-outline-primary sb-btn-xs sb-left-icon-btn sb-btn-radius text-inherit">Add Sibling</button>
 <button (click)="addChild();"  class="sb-btn sb-btn-outline-primary sb-btn-xs sb-left-icon-btn sb-btn-radius text-inherit">Add New</button>
+
+<sui-modal *ngIf="showDeleteConfirmationPopUp" [mustScroll]="true" [isClosable]="true" [transitionDuration]="0"
+  [size]="'normal'" class="sb-modal" appBodyScroll
+  (dismissed)="showDeleteConfirmationPopUp = !showDeleteConfirmationPopUp" #modal>
+  <div class="sb-modal-header">
+      Confirm
+  </div>
+  <div class="sb-modal-content">
+      <!-- <div class="sb-publish-content">
+        <div class="review-modal-list">
+          {{ contentComment }}
+      </div> -->
+      <div> Are you sure want to delete the selected Node?</div>
+  </div>
+  <div class="sb-modal-actions">
+    <button type="button" class="sb-btn sb-btn-normal sb-btn-primary mr-8" (click)="showDeleteConfirmationPopUp = !showDeleteConfirmationPopUp"> No </button>
+    <button type="button" class="sb-btn sb-btn-secondary sb-btn-normal " (click)="removeNode(); showDeleteConfirmationPopUp = !showDeleteConfirmationPopUp"> Yes </button>
+  </div>
+</sui-modal>
