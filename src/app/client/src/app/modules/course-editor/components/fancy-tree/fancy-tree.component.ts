@@ -66,7 +66,7 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
       },
       dnd5: {
         autoExpandMS: 400,
-        focusOnClick: true,
+        // focusOnClick: true,
         preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
         preventRecursion: true, // Prevent dropping nodes on own descendants
         dragStart: (node, data) => {
@@ -92,6 +92,11 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
           // Don't allow dropping *over* a node (would create a child)
           return ["before", "after"];
 */
+$(document).on('dragleave', (e) => {
+  if (e.originalEvent.pageX !== 0 || e.originalEvent.pageY !== 0) {
+      return false;
+  }
+});
            return true;
         },
         dragDrop: (node, data) => {
@@ -240,16 +245,17 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
     // const deleteTemplate = `<span> <i class="fa fa-trash-o" type="button"  onclick=""></i> </span>`;
     // tslint:disable-next-line:max-line-length
     const deleteTemplate = `<span class="ui dropdown sb-dotted-dropdown" autoclose="itemClick" suidropdown="" tabindex="0">
-                              <span id="contextMenu_${node.data.id}" class="p-0 w-auto"><i class="icon ellipsis vertical sb-color-black"></i></span>
-                              <span id= "contextMenuDropDown_${node.data.id}" class="menu transition hidden" suidropdownmenu="" style="">
-                                <div id="edit" class="item">Edit</div>
+                              <span id="contextMenu" class="p-0 w-auto"><i class="icon ellipsis vertical sb-color-black"></i></span>
+                              <span id= "contextMenuDropDown" class="menu transition hidden" suidropdownmenu="" style="">
                                 <div id="addsibling" class="item">Add Sibling</div>
                                 <div id="addchild" class="item">Add Child</div>
                                 <div id="delete" class="item">Delete</div>
+                                <div id="addresource" class="item">Add Resource</div>
                               </span>
                             </span>
-                            <span id= "removeNodeIcon_${node.data.id}"> <i class="fa fa-trash-o" type="button"></i> </span>`;
+                            <span id= "removeNodeIcon"> <i class="fa fa-trash-o" type="button"></i> </span>`;
     const deleteButton = $(deleteTemplate);
+    let contextMenu;
 
     $nodeSpan.append(deleteButton);
 
@@ -265,16 +271,19 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
       deleteButton.hide();
     };
 
-    $($nodeSpan[0]).find(`#contextMenu_${node.data.id}`).on('click', (event) => {
+    contextMenu = $($nodeSpan[0]).find(`#contextMenu`);
+
+    contextMenu.on('click', (event) => {
       this.treeService.closePrevOpenedDropDown();
       setTimeout(() => {
         const nSpan = $(this.getActiveNode().span);
 
-        const dropDownElement = $(nSpan[0]).find(`#contextMenuDropDown_${this.getActiveNode().data.id}`);
+        const dropDownElement = $(nSpan[0]).find(`#contextMenuDropDown`);
         dropDownElement.removeClass('hidden');
         dropDownElement.addClass('visible');
         _.forEach(_.get(_.first(dropDownElement), 'children'), item => {
           item.addEventListener('click', (ev) => {
+            this.treeService.closePrevOpenedDropDown();
             this.handleActionButtons(ev.currentTarget);
             ev.stopPropagation();
           });
@@ -283,7 +292,7 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
       // event.stopPropagation();
     });
 
-    $($nodeSpan[0]).find(`#removeNodeIcon_${node.data.id}`).on('click', (ev) => {
+    $($nodeSpan[0]).find(`#removeNodeIcon`).on('click', (ev) => {
       this.showDeleteConfirmationPopUp = true;
     });
 
@@ -325,6 +334,7 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
       //   position: 'topCenter',
       //   icon: 'fa fa-warning'
       // })
+      alert('This operation is not allowed!');
       return false;
     }
 
@@ -365,6 +375,8 @@ export class FancyTreeComponent implements AfterViewInit, OnDestroy {
         break;
       case 'addchild':
         this.addChild();
+        break;
+      case 'addresource':
         break;
     }
   }

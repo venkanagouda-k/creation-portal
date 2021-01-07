@@ -1,9 +1,8 @@
-
 <div #fancyTree></div>
-
-<button (click)="addSibling();" class="sb-btn sb-btn-outline-primary sb-btn-xs sb-left-icon-btn sb-btn-radius text-inherit">Add Sibling</button>
-<button (click)="addChild();"  class="sb-btn sb-btn-outline-primary sb-btn-xs sb-left-icon-btn sb-btn-radius text-inherit">Add New</button>
-
+<div class="sb-fixed-with-whitebg py-10">
+<button (click)="addSibling();" class="sb-btn sb-btn-outline-primary sb-btn-normal sb-btn-radius ml-20 mr-10">Add Sibling</button>
+<button (click)="addChild();"  class="sb-btn sb-btn-outline-primary sb-btn-normal sb-btn-radius">Add New</button>
+</div>
 <sui-modal *ngIf="showDeleteConfirmationPopUp" [mustScroll]="true" [isClosable]="true" [transitionDuration]="0"
   [size]="'normal'" class="sb-modal" appBodyScroll
   (dismissed)="showDeleteConfirmationPopUp = !showDeleteConfirmationPopUp" #modal>

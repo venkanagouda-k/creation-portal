@@ -73,7 +73,8 @@ export class TreeService {
 
   removeNode() {
     const selectedNode = this.getActiveNode();
-    this.setActiveNode(selectedNode.getPrevSibling());
+    const afterDeleteNode = selectedNode.getPrevSibling() ? selectedNode.getPrevSibling() : selectedNode.getParent();
+    this.setActiveNode(afterDeleteNode);
     selectedNode.remove();
     $('span.fancytree-title').attr('style', 'width:11em;text-overflow:ellipsis;white-space:nowrap;overflow:hidden');
     $(this.treeNativeElement).scrollLeft($('.fancytree-lastsib').width());
@@ -175,7 +176,7 @@ export class TreeService {
     $(this.treeNativeElement).fancytree('getTree').visit((node) => {
       const nSpan = $(node.span);
 
-        const dropDownElement = $(nSpan[0]).find(`#contextMenuDropDown_${node.data.id}`);
+        const dropDownElement = $(nSpan[0]).find(`#contextMenuDropDown`);
         dropDownElement.addClass('hidden');
         dropDownElement.removeClass('visible');
     });
